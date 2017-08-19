@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/MainApp.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/DbConnection.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/controller/AddCustomerViewController.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/view/UserAppView.fxml</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/view/LoginView.fxml</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/model/City.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/view/CalendarView.fxml</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/bundles/messages_es.properties</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/controller/UserAppViewController.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/model/Customer.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/view/AddCustomerView.fxml</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/view/AddAppointmentView.fxml</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/bundles/messages_fr.properties</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/model/Appointment.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/controller/AddAppointmentViewController.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/model/Schedule.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/view/RootLayout.fxml</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/controller/CalendarViewController.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/controller/LoginViewController.java</file>
+            <file>file:/C:/Users/Dan/Documents/NetBeansProjects/WGUSoftwareC195/src/wgusoftwarec195/bundles/messages_en.properties</file>
+        </group>
+    </open-files>
+</project-private>

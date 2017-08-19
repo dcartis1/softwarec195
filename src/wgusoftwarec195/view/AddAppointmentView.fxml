@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="700.0" prefWidth="1050.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111" fx:controller="wgusoftwarec195.controller.AddAppointmentViewController">
+   <children>
+      <TextField layoutX="109.0" layoutY="87.0" prefHeight="42.0" prefWidth="207.0" />
+      <TextField layoutX="109.0" layoutY="280.0" prefHeight="42.0" prefWidth="207.0" />
+      <TextField layoutX="109.0" layoutY="351.0" prefHeight="42.0" prefWidth="207.0" />
+      <TextArea layoutX="109.0" layoutY="154.0" prefHeight="103.0" prefWidth="207.0" />
+      <TextField layoutX="109.0" layoutY="415.0" prefHeight="42.0" prefWidth="207.0" />
+      <DatePicker layoutX="109.0" layoutY="484.0" />
+      <Button fx:id="cancelBtn" layoutX="858.0" layoutY="644.0" mnemonicParsing="false" onAction="#addAppointCancelBtn" text="Cancel" />
+      <Button layoutX="775.0" layoutY="644.0" mnemonicParsing="false" onAction="#handleAddAppointBtn" text="Save" />
+      <Button layoutX="980.0" layoutY="644.0" mnemonicParsing="false" text="Exit" />
+      <Button layoutX="665.0" layoutY="294.0" mnemonicParsing="false" text="Button" />
+      <Button layoutX="775.0" layoutY="294.0" mnemonicParsing="false" text="Button" />
+      <Label layoutX="14.0" layoutY="94.0" text="Title" />
+      <Label layoutX="14.0" layoutY="154.0" text="Description" />
+      <Label layoutX="14.0" layoutY="280.0" text="Location" />
+      <Label layoutX="14.0" layoutY="350.0" text="Contact" />
+      <Label layoutX="14.0" layoutY="422.0" text="Url" />
+      <Label layoutX="14.0" layoutY="491.0" text="Date" />
+      <TableView fx:id="custTable" layoutX="458.0" layoutY="32.0" prefHeight="250.0" prefWidth="580.0">
+         <columns>
+            <TableColumn fx:id="custIdColumn" prefWidth="38.0" text="Id" />
+            <TableColumn fx:id="custNameColumn" prefWidth="115.0" text="Name" />
+            <TableColumn fx:id="custAddressOneColumn" prefWidth="131.0" text="Address" />
+            <TableColumn fx:id="custAddressTwoColumn" prefWidth="148.0" text="Address 2" />
+            <TableColumn fx:id="custPhoneColumn" prefWidth="146.0" text="Phone" />
+         </columns>
+      </TableView>
+      <TableView fx:id="custTable1" layoutX="459.0" layoutY="351.0" prefHeight="250.0" prefWidth="580.0">
+         <columns>
+            <TableColumn fx:id="custIdColumn1" prefWidth="38.0" text="Id" />
+            <TableColumn fx:id="custNameColumn1" prefWidth="115.0" text="Name" />
+            <TableColumn fx:id="custAddressOneColumn1" prefWidth="131.0" text="Address" />
+            <TableColumn fx:id="custAddressTwoColumn1" prefWidth="148.0" text="Address 2" />
+            <TableColumn fx:id="custPhoneColumn1" prefWidth="146.0" text="Phone" />
+         </columns>
+      </TableView>
+      <Label layoutX="10.0" layoutY="559.0" text="Start Time" />
+      <Label layoutX="12.0" layoutY="630.0" text="End Time" />
+      <Spinner fx:id="startTimeSpinner" editable="true" layoutX="109.0" layoutY="552.0" />
+      <Spinner fx:id="endTimeSpinner" editable="true" layoutX="109.0" layoutY="623.0" />
+   </children>
+</AnchorPane>
