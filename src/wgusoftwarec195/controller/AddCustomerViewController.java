@@ -155,7 +155,7 @@ public class AddCustomerViewController {
                 ps.executeUpdate();
                 rs = ps.getGeneratedKeys();
 
-                //insert new record into customer table
+                //insert new record into customer table in sql db
                 if (rs.next()){
                     int newAddressId = rs.getInt(1);
                     sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy) VALUES ('"+ custNameField.getText()
@@ -165,7 +165,7 @@ public class AddCustomerViewController {
                     ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                     ps.executeUpdate();
                     rs = ps.getGeneratedKeys();
-                    //add customer window
+                    //add new customer to customer arraylist
                     if(rs.next()){
                         int newCustomerId = rs.getInt(1);
                         customer = new Customer();

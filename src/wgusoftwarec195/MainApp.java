@@ -7,6 +7,7 @@ package wgusoftwarec195;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Locale;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,6 +22,7 @@ import wgusoftwarec195.controller.UserAppViewController;
 import wgusoftwarec195.model.Customer;
 import wgusoftwarec195.model.Schedule;
 import wgusoftwarec195.controller.CalendarViewController;
+import wgusoftwarec195.model.Appointment;
 
 /**
  *
@@ -196,7 +198,8 @@ public class MainApp extends Application {
         //pass the current user's details to the controller so that
         //we know who is going to be making changes to the database
         AddAppointmentViewController controller = loader.getController();
-        controller.setMainApp(this, userId, userName, schedule);
+        Appointment appointment = new Appointment();
+        controller.setMainApp(this, userId, userName, schedule, appointment);
         
         // Create the dialog Stage.
         Stage dialogStage = new Stage();
@@ -219,42 +222,9 @@ public class MainApp extends Application {
         return false;
     }
 }
-    
-    public boolean showCalendarView() {
-    try {
-        // Load the fxml file and create a new stage
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(MainApp.class.getResource("view/CalendarView.fxml"));
-        AnchorPane page = (AnchorPane) loader.load();
 
-        // Give the controller access to the main app and also
-        //pass the current user's details to the controller so that
-        //we know who is going to be making changes to the database
-        CalendarViewController controller = loader.getController();
-        controller.setMainApp(this);
-        
-        // Create the dialog Stage.
-        Stage dialogStage = new Stage();
-        dialogStage.setTitle("Add Customer");
-        dialogStage.initModality(Modality.WINDOW_MODAL);
-        dialogStage.initOwner(primaryStage);
-        Scene scene = new Scene(page);
-        dialogStage.setScene(scene);
-        
-        //set dialog stage into the controller
-        controller.setDialogStage(dialogStage);
-        
-        // Show the dialog and wait until the user closes it
-        dialogStage.showAndWait();
-        return controller.isOkClicked();
-    } catch (IOException e) {
-        e.printStackTrace();
-        return false;
-    }
-}
-    
     //saves user details after login so they can be used throughout the application,
-    //more specifically when the user is creating or updating records in the database
+    //specifically when the user is creating or updating records in the database
     public void setUserDetails(int userId, String userName){
         this.userId = userId;
         this.userName = userName;

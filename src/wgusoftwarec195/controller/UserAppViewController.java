@@ -9,13 +9,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -61,13 +65,11 @@ public class UserAppViewController {
     @FXML
     private TableColumn<Appointment, String> appointDescriptionColumn;
     @FXML
-    private TableColumn<Appointment, String> appointClientColumn;
-    @FXML
     private TableColumn<Appointment, String> appointLocationColumn;
     @FXML
-    private TableColumn<Appointment, LocalDate> appointStartColumn;
+    private TableColumn<Appointment, String> appointStartColumn;
     @FXML
-    private TableColumn<Appointment, LocalDate> appointEndColumn;
+    private TableColumn<Appointment, String> appointEndColumn;
     
     @FXML
     private Button exitBtn;
@@ -85,7 +87,7 @@ public class UserAppViewController {
     private Appointment appointment;
     
     Date date = new Date();
-    private final LocalDate localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    private final LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     
     private final ObservableList<Appointment> weekly = FXCollections.observableArrayList();
     private final ObservableList<Appointment> monthly = FXCollections.observableArrayList();
@@ -94,21 +96,36 @@ public class UserAppViewController {
     @FXML
     private void initialize() throws ClassNotFoundException, SQLException {
         locale = Locale.getDefault();
+      
+        custIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty().asObject());
+        custNameColumn.setCellValueFactory(cellData -> cellData.getValue().customerNameProperty());
+        custAddressOneColumn.setCellValueFactory(cellData -> cellData.getValue().addressOneProperty());
+        custAddressTwoColumn.setCellValueFactory(cellData -> cellData.getValue().addressTwoProperty());
+        custPhoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneProperty());
         
-        custIdColumn.setCellValueFactory(new PropertyValueFactory<>("customerId"));
-        custNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        custAddressOneColumn.setCellValueFactory(new PropertyValueFactory<>("addressOne"));
-        custAddressTwoColumn.setCellValueFactory(new PropertyValueFactory<>("addressTwo"));
-        custPhoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
         
+        appointIdColumn.setCellValueFactory(cellData -> cellData.getValue().appointmentIdProperty().asObject());
+        appointTitleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
+        appointDescriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
+        appointLocationColumn.setCellValueFactory(cellData -> cellData.getValue().locationProperty());
+        appointStartColumn.setCellValueFactory(cellData -> cellData.getValue().startProperty());
+        appointEndColumn.setCellValueFactory(cellData -> cellData.getValue().endProperty());
+    }
+    
+    @FXML
+    private Button fartBtn;
+          
+    
+    @FXML
+    private void fartBtnClick(){
         
-        appointIdColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentId"));
-        appointTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        appointDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-        appointClientColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        appointLocationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
-        appointStartColumn.setCellValueFactory(new PropertyValueFactory<>("start"));
-        appointEndColumn.setCellValueFactory(new PropertyValueFactory<>("end"));
+        ZoneId timeZoneId = ZoneId.systemDefault(); // my timezone
+        ZoneOffset timeZoneOffset = timeZoneId.getRules().getOffset(localDateTime);
+        
+        System.out.println(localDateTime);
+        System.out.println(timeZoneId);
+        System.out.println(timeZoneOffset);
+        
     }
     
     @FXML 
@@ -116,10 +133,6 @@ public class UserAppViewController {
         okClicked = mainApp.showAddCustView();
     }
     
-    @FXML 
-    private void handleCalendarView(){
-        okClicked = mainApp.showCalendarView();
-    }
     
     //edit customer button
     @FXML
@@ -212,13 +225,11 @@ public class UserAppViewController {
                         rs.getString(6), rs.getInt(7), rs.getInt(8), rs.getString(9)));
             }
             
-            sql = "SELECT appointment.appointmentId, appointment.customerId, customer.customerName, appointment.title, appointment.description, appointment.location, appointment.contact,"
-                    + "appointment.url, appointment.start, appointment.end FROM appointment join customer on appointment.customerId=customer.customerId";
+            sql = "SELECT appointment.appointmentId, appointment.customerId, appointment.title, appointment.description, appointment.location, appointment.contact,"
+                    + "appointment.url, appointment.start, appointment.end FROM appointment";
         
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
-            
-            
 
             while (rs.next()) {
                 
@@ -227,8 +238,8 @@ public class UserAppViewController {
                 int month2 = localDate.getMonthValue();
                 
                 if(month == month2){
-                    monthly.add(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
+                    monthly.add(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4),
+                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)));
                 }
                 
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
@@ -237,13 +248,13 @@ public class UserAppViewController {
                 int week2 = localDate.get(weekFields.weekOfWeekBasedYear());
                 
                 if(week == week2){
-                    weekly.add(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
+                    weekly.add(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4),
+                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)));
                 }
 
                 //place appointment data into model
-                schedule.addAppointment(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9), rs.getString(10)));
+                schedule.addAppointment(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4),
+                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)));
             }
         }
         

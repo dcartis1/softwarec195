@@ -142,14 +142,12 @@ public class LoginViewController {
                 System.out.println("User has an id of " +userId);
                 
             mainApp.setUserDetails(userId, userName);
+            
+            boolean okClicked = mainApp.showUserAppView();
 
             } else {
                 wrongInputFXML();
             }
-        }
-        //if try succeeds, resources are closed and move on to userappview
-        finally{
-            boolean okClicked = mainApp.showUserAppView();
         }
     }
     public void wrongInputFXML() throws IOException {

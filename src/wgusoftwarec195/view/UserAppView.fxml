@@ -22,12 +22,11 @@
       <TableView fx:id="appointTable" layoutX="13.0" layoutY="58.0" prefHeight="250.0" prefWidth="1024.0">
         <columns>
           <TableColumn fx:id="appointIdColumn" prefWidth="41.0" text="Id" />
-          <TableColumn fx:id="appointTitleColumn" prefWidth="99.0" text="Title" />
-            <TableColumn fx:id="appointDescriptionColumn" prefWidth="197.0" text="Description" />
-            <TableColumn fx:id="appointClientColumn" prefWidth="145.0" text="Client" />
-            <TableColumn fx:id="appointLocationColumn" prefWidth="122.0" text="Location" />
-            <TableColumn fx:id="appointStartColumn" prefWidth="211.0" text="Start" />
-            <TableColumn fx:id="appointEndColumn" prefWidth="207.0" text="End" />
+          <TableColumn fx:id="appointTitleColumn" prefWidth="149.0" text="Title" />
+            <TableColumn fx:id="appointDescriptionColumn" prefWidth="224.0" text="Description" />
+            <TableColumn fx:id="appointLocationColumn" prefWidth="169.0" text="Location" />
+            <TableColumn fx:id="appointStartColumn" prefWidth="220.0" text="Start" />
+            <TableColumn fx:id="appointEndColumn" prefWidth="220.0" text="End" />
         </columns>
       </TableView>
       <ButtonBar layoutX="671.0" layoutY="588.0" prefHeight="42.0" prefWidth="314.0">
@@ -46,8 +45,8 @@
             <Button fx:id="custDeleteBtn1" mnemonicParsing="false" onAction="#deleteCustBtn" text="Delete" />
          </buttons>
       </ButtonBar>
-      <Button layoutX="14.0" layoutY="644.0" mnemonicParsing="false" onAction="#handleCalendarView" text="Calendar" />
       <Button layoutX="290.0" layoutY="7.0" mnemonicParsing="false" onAction="#setCalendarWeekly" text="This Week" />
       <Button layoutX="154.0" layoutY="7.0" mnemonicParsing="false" onAction="#setCalendarMonthly" prefHeight="4.0" prefWidth="121.0" text="This Month" />
+      <Button fx:id="fartBtn" layoutX="282.0" layoutY="609.0" mnemonicParsing="false" onAction="#fartBtnClick" text="Button" />
    </children>
 </AnchorPane>

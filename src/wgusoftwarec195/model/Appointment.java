@@ -5,12 +5,8 @@
  */
 package wgusoftwarec195.model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -24,7 +20,6 @@ public class Appointment {
     
     private final IntegerProperty appointmentId;
     private final IntegerProperty customerId;
-    private final StringProperty customerName;
     private final StringProperty title;
     private final StringProperty description;
     private final StringProperty location;
@@ -39,22 +34,20 @@ public class Appointment {
         
         this.appointmentId = new SimpleIntegerProperty(0);
         this.customerId = new SimpleIntegerProperty(0);
-        this.customerName = new SimpleStringProperty("");
         this.title = new SimpleStringProperty("");
         this.description = new SimpleStringProperty("");
         this.location = new SimpleStringProperty("");
         this.contact = new SimpleStringProperty("");
         this.url = new SimpleStringProperty("");
-        this.start = new SimpleStringProperty();
-        this.end = new SimpleStringProperty();
+        this.start = new SimpleStringProperty("");
+        this.end = new SimpleStringProperty("");
     }
     
-    public Appointment(int appointmentId, int customerId, String customerName, String title, String description, String location, String contact, String url,
+    public Appointment(int appointmentId, int customerId, String title, String description, String location, String contact, String url,
             String start, String end){
         
         this.appointmentId = new SimpleIntegerProperty(appointmentId);
         this.customerId = new SimpleIntegerProperty(customerId);
-        this.customerName = new SimpleStringProperty(customerName);
         this.title = new SimpleStringProperty(title);
         this.description = new SimpleStringProperty(description);
         this.location = new SimpleStringProperty(location);
@@ -86,18 +79,6 @@ public class Appointment {
     
     public IntegerProperty customerIdProperty(){
         return customerId;
-    }
-    
-    public String getCustomerName(){
-        return customerName.get();
-    }
-    
-    public void setCustomerName(String customerName){
-        this.customerName.set(customerName);
-    }
-    
-    public StringProperty customerNameProperty(){
-        return customerName;
     }
     
     public String getTitle(){

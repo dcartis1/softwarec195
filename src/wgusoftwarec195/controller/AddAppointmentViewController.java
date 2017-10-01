@@ -11,6 +11,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,15 +26,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import wgusoftwarec195.DbConnection;
 import wgusoftwarec195.MainApp;
+import wgusoftwarec195.TimeConverter;
 import wgusoftwarec195.model.Appointment;
 import wgusoftwarec195.model.City;
 import wgusoftwarec195.model.Customer;
@@ -55,12 +63,31 @@ public class AddAppointmentViewController {
     @FXML
     private DatePicker appointDateField;
     @FXML
-    private Spinner startTimeSpinner;
+    private TextField startTimeField;
     @FXML
-    private Spinner endTimeSpinner;
+    private TextField endTimeField;
+    @FXML
+    private Label startTimeLabel;
+    @FXML
+    private Label endTimeLabel;
+    @FXML
+    private Button timeValidTest;
     
     @FXML
-    private TableView<Customer> custTable1;
+    private TableView<Customer> custTable;
+    @FXML
+    private TableColumn<Customer, Integer> custIdColumn;
+    @FXML
+    private TableColumn<Customer, String> custNameColumn;
+    @FXML
+    private TableColumn<Customer, String> custAddressOneColumn;
+    @FXML
+    private TableColumn<Customer, String> custAddressTwoColumn;
+    @FXML
+    private TableColumn<Customer, String> custPhoneColumn;
+    
+    @FXML
+    private TableView<Customer> addedCustTable;
     @FXML
     private TableColumn<Customer, Integer> custIdColumn1;
     @FXML
@@ -73,18 +100,7 @@ public class AddAppointmentViewController {
     private TableColumn<Customer, String> custPhoneColumn1;
     
     @FXML
-    private TableView<Customer> custTable2;
-    @FXML
-    private TableColumn<Customer, Integer> custIdColumn2;
-    @FXML
-    private TableColumn<Customer, String> custNameColumn2;
-    @FXML
-    private TableColumn<Customer, String> custAddressOneColumn2;
-    @FXML
-    private TableColumn<Customer, String> custAddressTwoColumn2;
-    @FXML
-    private TableColumn<Customer, String> custPhoneColumn2;
-    
+    private Button addCustomerBtn;
     @FXML
     private Button addAppointBtn;
     @FXML
@@ -112,47 +128,81 @@ public class AddAppointmentViewController {
     
     @FXML
     private void initialize() throws SQLException, ClassNotFoundException{
-        this.startValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 24, 1);
-        this.endValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1,24,1);
-        startTimeSpinner.setValueFactory(startValueFactory);
-        endTimeSpinner.setValueFactory(endValueFactory);
+        
+        custIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty().asObject());
+        custNameColumn.setCellValueFactory(cellData -> cellData.getValue().customerNameProperty());
+        custAddressOneColumn.setCellValueFactory(cellData -> cellData.getValue().addressOneProperty());
+        custAddressTwoColumn.setCellValueFactory(cellData -> cellData.getValue().addressTwoProperty());
+        custPhoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneProperty());
+        
+        custIdColumn1.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty().asObject());
+        custNameColumn1.setCellValueFactory(cellData -> cellData.getValue().customerNameProperty());
+        custAddressOneColumn1.setCellValueFactory(cellData -> cellData.getValue().addressOneProperty());
+        custAddressTwoColumn1.setCellValueFactory(cellData -> cellData.getValue().addressTwoProperty());
+        custPhoneColumn1.setCellValueFactory(cellData -> cellData.getValue().phoneProperty());
     }
         
-    //save button inside add new customer window
+    //save button inside add appointment window
     @FXML
     public void handleAddAppointBtn(ActionEvent event) throws SQLException, IOException, ClassNotFoundException{  
-
-        //everything related to adding or updating customer is performed in this try-with-resources block
+ 
+        // adding or updating appointment is performed in this try-with-resources block
         //so that if any errors occur, the sql transaction will not commit and roll back any database changes.
         try (Connection conn = DbConnection.createConnection()){
             
             //begin sql transaction
             conn.setAutoCommit(false);
 
-            //correctly formatted datetime to be inserted into createdate and lastupdateby columns
+            LocalDate ad = appointDateField.getValue();
+            LocalTime st = LocalTime.parse(startTimeField.getText());
+            LocalTime et = LocalTime.parse(endTimeField.getText());
+            
+            LocalDateTime appointStart = LocalDateTime.of(ad, st);
+            LocalDateTime appointEnd = LocalDateTime.of(ad, et);
+            
+            //correctly formatted timestamp to be inserted into createdate column
             java.util.Date dt = new java.util.Date();
             java.text.SimpleDateFormat sdf = 
             new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String currentTime = sdf.format(dt);
-
+               
+            
             if (newAppoint == true){
-                //insert new record into address table first to retrieve address id for customer table
+                //insert new record into address table first to retrieve address id for appointment table
                 sql = "INSERT INTO appointment (customerId, title, description, location, contact, url, start, end, createDate, createdBy, lastUpdateBy) VALUES "
-                        + "('"+ /*setcustomerid here*/"', '"+ appointTitleField.getText()+"', '"+ appointDescriptionArea.getText() +"',"
-                        + "'"+ appointLocationField.getText() +"', '"+ appointContactField.getText() +"', '"+ appointUrlField +"'"
-                        + ", '"+ appointDateField.getChronology() +"','"+ startTimeSpinner.getValue()+"', '"+endTimeSpinner.getValue()+"',"
-                        + " '"+ currentTime+"', '" + userName +"', '" + userName +"')";
+                        + "('" + appointment.getCustomerInAppointmentData().get(0).getCustomerId() +"', '"+ appointTitleField.getText()+"', '"+ appointDescriptionArea.getText() +"',"
+                        + "'"+ appointLocationField.getText() +"', '"+ appointContactField.getText() +"', '"+ appointUrlField.getText() +"'"
+                        + ",'"+ TimeConverter.ConvertToUtc(appointStart) +"', '"+ TimeConverter.ConvertToUtc(appointEnd) +"',"
+                        + " '"+ TimeConverter.ConvertToUtc(currentTime)+"', '" + userName +"', '" + userName +"')";
                 //returns the auto_incremented addressId
                 ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 //executeUpdate method does not return resultset but instead returns affected rows as an int.
                 ps.executeUpdate();
                 rs = ps.getGeneratedKeys();
-
+                 if(rs.next()){
+                    
+                     
+                    int newAppointmentId = rs.getInt(1);
+                    appointment = new Appointment();
+                    appointment.setAppointmentId(newAppointmentId);
+                    appointment.setTitle(appointTitleField.getText());
+                    appointment.setDescription(appointDescriptionArea.getText());
+                    appointment.setLocation(appointLocationField.getText());
+                    appointment.setContact(appointContactField.getText());
+                    appointment.setUrl(appointUrlField.getText());
+                    appointment.setStart(startTimeField.getText());
+                    appointment.setEnd(endTimeField.getText());
+                    
+                    schedule.addAppointment(appointment);
+                    System.out.println("appointment added!");
+                    dialogStage.close();
+                    conn.commit();
+                 }
             }
             /*
             else{
                 
-                //update existing customer record
+                //update existing appointment record
                 sql = "UPDATE appointment SET customerName='"+ custNameField.getText() +"', active="+ custActive +","
                         + " lastUpdateBy='"+ userName +"' WHERE customerId='"+ customer.getCustomerId() +"'";
 
@@ -220,10 +270,27 @@ public class AddAppointmentViewController {
         }
     }
     
+    //Adds customer from the all customer table into the associated customer table
+    @FXML
+    public void addCustomerBtnClick(){
+        Customer selectedCustomer = custTable.getSelectionModel().getSelectedItem();
+        if (selectedCustomer != null){
+            appointment.getCustomerInAppointmentData().add(selectedCustomer);
+            addedCustTable.setItems(appointment.getCustomerInAppointmentData());
+        }
+        else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Customer is selected");
+            alert.setContentText("Please select a Customer from the top table.");
+            alert.showAndWait();
+        }
+    }
+    
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
     }
-    
+
     //main app tells us if user is adding new or editing existing customer
     public void setNewAppoint(boolean newAppoint){
         this.newAppoint = newAppoint;
@@ -240,10 +307,55 @@ public class AddAppointmentViewController {
     //finish populating textfields with existing appointment data
     }
     
-    public void setMainApp(MainApp mainApp, int userId, String userName, Schedule schedule) {
+    public void setMainApp(MainApp mainApp, int userId, String userName, Schedule schedule, Appointment appointment) {
         this.mainApp = mainApp;
         this.userId = userId;
         this.userName = userName;
         this.schedule = schedule;
+        this.appointment = appointment;
+        
+        custTable.setItems(schedule.getCustomerData());
+    }
+    
+    //validates user input of start and end appointment time textfields.
+    public boolean timeValidate(){
+        String time = startTimeField.getText();
+        if(!time.matches("^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$")){
+            startTimeLabel.setTextFill(Color.web("red"));
+            
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Input Validation");
+            alert.setHeaderText("Start not valid");
+            alert.setContentText("Max must be a number.");
+
+            alert.showAndWait();
+            return false;
+
+        }
+        
+        time = endTimeField.getText();
+        if(!time.matches("^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$")){
+            endTimeLabel.setTextFill(Color.web("red"));
+            
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Input Validation");
+            alert.setHeaderText("End not valid");
+            alert.setContentText("Max must be a number.");
+
+            alert.showAndWait();
+            return false;
+
+        }
+        
+            LocalDate ad = appointDateField.getValue();
+            LocalTime st = LocalTime.parse(startTimeField.getText());
+            LocalTime et = LocalTime.parse(endTimeField.getText());
+            
+            LocalDateTime appointStart = LocalDateTime.of(ad, st);
+            LocalDateTime appointEnd = LocalDateTime.of(ad, et);
+            
+            System.out.println(st+ ","+ et);
+            System.out.println(appointStart+","+ appointEnd);
+    return true;
     }
 }
