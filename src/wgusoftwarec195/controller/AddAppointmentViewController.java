@@ -173,7 +173,7 @@ public class AddAppointmentViewController {
                         + "('" + appointment.getCustomerInAppointmentData().get(0).getCustomerId() +"', '"+ appointTitleField.getText()+"', '"+ appointDescriptionArea.getText() +"',"
                         + "'"+ appointLocationField.getText() +"', '"+ appointContactField.getText() +"', '"+ appointUrlField.getText() +"'"
                         + ",'"+ TimeConverter.ConvertToUtc(appointStart) +"', '"+ TimeConverter.ConvertToUtc(appointEnd) +"',"
-                        + " '"+ TimeConverter.ConvertToUtc(currentTime)+"', '" + userName +"', '" + userName +"')";
+                        + " '"+ currentTime+"', '" + userName +"', '" + userName +"')";
                 //returns the auto_incremented addressId
                 ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 //executeUpdate method does not return resultset but instead returns affected rows as an int.
