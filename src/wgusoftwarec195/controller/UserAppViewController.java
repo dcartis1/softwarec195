@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,6 +34,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import wgusoftwarec195.DbConnection;
 import wgusoftwarec195.MainApp;
+import wgusoftwarec195.TimeConverter;
 import wgusoftwarec195.model.Appointment;
 import wgusoftwarec195.model.Customer;
 import wgusoftwarec195.model.Schedule;
@@ -84,7 +86,6 @@ public class UserAppViewController {
     private Stage dialogStage;
     private int userId;
     private Schedule schedule;
-    private Appointment appointment;
     
     Date date = new Date();
     private final LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -103,29 +104,11 @@ public class UserAppViewController {
         custAddressTwoColumn.setCellValueFactory(cellData -> cellData.getValue().addressTwoProperty());
         custPhoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneProperty());
         
-        
-        appointIdColumn.setCellValueFactory(cellData -> cellData.getValue().appointmentIdProperty().asObject());
         appointTitleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         appointDescriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
         appointLocationColumn.setCellValueFactory(cellData -> cellData.getValue().locationProperty());
         appointStartColumn.setCellValueFactory(cellData -> cellData.getValue().startProperty());
         appointEndColumn.setCellValueFactory(cellData -> cellData.getValue().endProperty());
-    }
-    
-    @FXML
-    private Button fartBtn;
-          
-    
-    @FXML
-    private void fartBtnClick(){
-        
-        ZoneId timeZoneId = ZoneId.systemDefault(); // my timezone
-        ZoneOffset timeZoneOffset = timeZoneId.getRules().getOffset(localDateTime);
-        
-        System.out.println(localDateTime);
-        System.out.println(timeZoneId);
-        System.out.println(timeZoneOffset);
-        
     }
     
     @FXML 
@@ -137,7 +120,6 @@ public class UserAppViewController {
     //edit customer button
     @FXML
     private void handleEditCust() {
-        
         //gets selected customer and passes it to addcustomerview controller through mainApp
         Customer selectedCust = custTable.getSelectionModel().getSelectedItem();
         if (selectedCust != null) {
@@ -150,7 +132,6 @@ public class UserAppViewController {
             alert.setTitle("No Selection");
             alert.setHeaderText("No Customer Selected");
             alert.setContentText("Please select a Customer to edit.");
-
             alert.showAndWait();
         }
     }
@@ -204,7 +185,23 @@ public class UserAppViewController {
     }
     
     @FXML
-    public void handleEditAppointment(ActionEvent event){}
+    public void handleEditAppointment(ActionEvent event) throws ClassNotFoundException, SQLException{
+        //gets selected apointment and passes it to overloaded addappointment controller through mainApp
+        Appointment selectedAppointment = appointTable.getSelectionModel().getSelectedItem();
+        if (selectedAppointment != null) {
+            okClicked = mainApp.showAddAppointmentView(selectedAppointment);
+        }
+        else {
+            // Nothing selected.
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.initOwner(mainApp.getPrimaryStage());
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Appointment Selected");
+            alert.setContentText("Please select an Appointment to view/edit.");
+
+            alert.showAndWait();
+        }
+    }
     
     public void setMainApp(MainApp mainApp, int userId, Schedule schedule) throws ClassNotFoundException, SQLException {
         this.mainApp = mainApp;
@@ -212,6 +209,7 @@ public class UserAppViewController {
         this.schedule = schedule;
         
         try (Connection conn = DbConnection.createConnection()){
+            //select customers from customer table and populate model/tableview
             sql = "SELECT customer.customerId, customer.customerName, address.addressId, address.address, address.address2,"
                 + " address.postalCode, address.cityId, customer.active, address.phone"
                 + " from customer join address on customer.addressId=address.addressId";
@@ -220,45 +218,60 @@ public class UserAppViewController {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                //place customer's data from db into model
                 schedule.addCustomer(new Customer(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getString(5),
                         rs.getString(6), rs.getInt(7), rs.getInt(8), rs.getString(9)));
             }
-            
+            //select appointments from appointment table and populate model/tableview
             sql = "SELECT appointment.appointmentId, appointment.customerId, appointment.title, appointment.description, appointment.location, appointment.contact,"
-                    + "appointment.url, appointment.start, appointment.end FROM appointment";
+                    + "appointment.url, appointment.start, appointment.end, customer.customerName, address.addressId, address.address, address.address2, address.postalCode,"
+                    + " address.cityId, customer.active, address.phone FROM appointment INNER JOIN customer ON appointment.customerId = customer.customerId"
+                    + " LEFT OUTER JOIN address ON customer.addressId = address.addressId";
         
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
-
+            
+            int i = 0;
             while (rs.next()) {
                 
+                //convert appointment start and end timestamps to localdatetime
+                LocalDateTime startLocalTime = rs.getTimestamp(8).toLocalDateTime();
+                LocalDateTime endLocalTime = rs.getTimestamp(9).toLocalDateTime();
+                
+                //gets the current month, and the month from scheduled appointments
                 int month = localDateTime.getMonthValue();
                 LocalDate localDate = rs.getTimestamp(9).toLocalDateTime().toLocalDate();
                 int month2 = localDate.getMonthValue();
                 
+                //adds appointments with month matching current month, to arraylist to be
+                //displayed in monthly tableview
                 if(month == month2){
                     monthly.add(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)));
+                        rs.getString(5), rs.getString(6), rs.getString(7), TimeConverter.ConvertToLocal(startLocalTime), TimeConverter.ConvertToLocal(endLocalTime)));
                 }
                 
+                //gets current week and week of scheduled appointments
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                
                 int week = localDateTime.get(weekFields.weekOfWeekBasedYear());
                 int week2 = localDate.get(weekFields.weekOfWeekBasedYear());
                 
+                //adds appointments with week matching current week, to arraylist
+                //to be displayed in weekly tableview
                 if(week == week2){
                     weekly.add(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)));
+                        rs.getString(5), rs.getString(6), rs.getString(7), TimeConverter.ConvertToLocal(startLocalTime), TimeConverter.ConvertToLocal(endLocalTime)));
                 }
 
-                //place appointment data into model
+                //place appointment data into schedule model
                 schedule.addAppointment(new Appointment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)));
+                        rs.getString(5), rs.getString(6), rs.getString(7), TimeConverter.ConvertToLocal(startLocalTime), TimeConverter.ConvertToLocal(endLocalTime)));
+                
+                schedule.getAppointmentData().get(i).getCustomerInAppointmentData().add(new Customer(rs.getInt(2), rs.getString(10), rs.getInt(11), rs.getString(12),
+                        rs.getString(13), rs.getString(14), rs.getInt(15), rs.getInt(16), rs.getString(17)));
+
+                System.out.println(schedule.getAppointmentData().get(i).getCustomerInAppointmentData().get(0).getCustomerId());
+                i++;
             }
-        }
-        
-        
+        }  
         custTable.setItems(schedule.getCustomerData());
         appointTable.setItems(schedule.getAppointmentData());
     }
@@ -278,7 +291,6 @@ public class UserAppViewController {
     public void setCalendarMonthly(){
         appointTable.setItems(null);
         appointTable.setItems(monthly);
-
     }
     
     public void setCalendarWeekly(){

@@ -197,8 +197,8 @@ public class MainApp extends Application {
         // Give the controller access to the main app and also
         //pass the current user's details to the controller so that
         //we know who is going to be making changes to the database
-        AddAppointmentViewController controller = loader.getController();
         Appointment appointment = new Appointment();
+        AddAppointmentViewController controller = loader.getController();
         controller.setMainApp(this, userId, userName, schedule, appointment);
         
         // Create the dialog Stage.
@@ -214,6 +214,45 @@ public class MainApp extends Application {
         
         //tell controller that user is adding a new customer
         controller.setNewAppoint(true);
+        // Show the dialog and wait until the user closes it
+        dialogStage.showAndWait();
+        return controller.isOkClicked();
+    } catch (IOException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    
+     public boolean showAddAppointmentView(Appointment appointment) throws ClassNotFoundException, SQLException {
+    try {
+        // Load the fxml file and create a new stage
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(MainApp.class.getResource("view/AddAppointmentView.fxml"));
+        AnchorPane page = (AnchorPane) loader.load();
+
+        //Give the controller access to the main app 
+        AddAppointmentViewController controller = loader.getController();
+
+        //tell the controller that user selected an appointment for view/edit
+        controller.setNewAppoint(false);
+        //pass the current user's details to the controller, as well as
+        //the selected appointment
+        controller.setMainApp(this, userId, userName, schedule, appointment);
+        controller.setAppoint(appointment);
+        
+        // Create the dialog Stage.
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("Add Appointment");
+        dialogStage.initModality(Modality.WINDOW_MODAL);
+        dialogStage.initOwner(primaryStage);
+        Scene scene = new Scene(page);
+        dialogStage.setScene(scene);
+        
+        //set dialog stage into the controller
+        controller.setDialogStage(dialogStage);
+        
+        //tell controller that user is adding a new appointment
+        controller.setNewAppoint(false);
         // Show the dialog and wait until the user closes it
         dialogStage.showAndWait();
         return controller.isOkClicked();

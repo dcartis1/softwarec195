@@ -12,11 +12,13 @@
 <AnchorPane id="AnchorPane" prefHeight="700.0" prefWidth="1050.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wgusoftwarec195.controller.AddAppointmentViewController">
    <children>
       <TextField fx:id="appointTitleField" layoutX="109.0" layoutY="87.0" prefHeight="42.0" prefWidth="207.0" />
+      <TextArea fx:id="appointDescriptionArea" layoutX="109.0" layoutY="154.0" prefHeight="103.0" prefWidth="207.0" />
       <TextField fx:id="appointLocationField" layoutX="109.0" layoutY="280.0" prefHeight="42.0" prefWidth="207.0" />
       <TextField fx:id="appointContactField" layoutX="109.0" layoutY="351.0" prefHeight="42.0" prefWidth="207.0" />
-      <TextArea fx:id="appointDescriptionArea" layoutX="109.0" layoutY="154.0" prefHeight="103.0" prefWidth="207.0" />
       <TextField fx:id="appointUrlField" layoutX="109.0" layoutY="415.0" prefHeight="42.0" prefWidth="207.0" />
       <DatePicker fx:id="appointDateField" layoutX="109.0" layoutY="484.0" />
+      <TextField fx:id="startTimeField" layoutX="110.0" layoutY="552.0" prefHeight="42.0" prefWidth="96.0" promptText="00:00" />
+      <TextField fx:id="endTimeField" layoutX="109.0" layoutY="623.0" prefHeight="42.0" prefWidth="96.0" promptText="00:00" />
       <Button fx:id="cancelBtn" layoutX="858.0" layoutY="644.0" mnemonicParsing="false" onAction="#addAppointCancelBtn" text="Cancel" />
       <Button layoutX="775.0" layoutY="644.0" mnemonicParsing="false" onAction="#handleAddAppointBtn" text="Save" />
       <Button layoutX="980.0" layoutY="644.0" mnemonicParsing="false" text="Exit" />
@@ -48,10 +50,9 @@
       </TableView>
       <Label fx:id="startTimeLabel" layoutX="10.0" layoutY="559.0" text="Start Time" />
       <Label fx:id="endTimeLabel" layoutX="12.0" layoutY="630.0" text="End Time" />
-      <TextField fx:id="startTimeField" layoutX="110.0" layoutY="552.0" prefHeight="42.0" prefWidth="96.0" promptText="00:00" />
-      <TextField fx:id="endTimeField" layoutX="109.0" layoutY="623.0" prefHeight="42.0" prefWidth="96.0" promptText="00:00" />
       <Button fx:id="timeValidTest" layoutX="375.0" layoutY="630.0" mnemonicParsing="false" onAction="#timeValidate" text="Button" />
       <Label layoutX="459.0" text="All Customers" />
       <Label layoutX="459.0" layoutY="322.0" text="Associated Customer" />
+      <Label fx:id="addAppointLabel" layoutX="17.0" layoutY="14.0" text="Add Appointment" />
    </children>
 </AnchorPane>

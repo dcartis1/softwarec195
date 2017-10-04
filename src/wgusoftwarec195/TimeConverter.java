@@ -9,26 +9,32 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
  * @author Dan
  */
-public class TimeConverter {
+public final class TimeConverter {
     
-    public static Timestamp ConvertToUtc(LocalDateTime time){
-        //Convert to a ZonedDate Time in UTC
+    //Convert the system's time to utc time to be stored in database
+    public static Timestamp ConvertToUtc(LocalDateTime time){   
         ZoneId zoneId = ZoneId.systemDefault();
-        ZonedDateTime zdtStart = time.atZone(zoneId);
-        System.out.println("Local Start Time: " + zdtStart);
-        ZonedDateTime utcStart = zdtStart.withZoneSameInstant(ZoneId.of("UTC"));
-        System.out.println("Zoned Start time: " + utcStart);
-        time = utcStart.toLocalDateTime();
-        System.out.println("Zoned time with zone stripped:" + time);
+        ZonedDateTime zdt = time.atZone(zoneId);
+        ZonedDateTime utc = zdt.withZoneSameInstant(ZoneId.of("UTC"));
+        time = utc.toLocalDateTime();
         //Create Timestamp values from Instants to update database
-        Timestamp appointStartTs = Timestamp.valueOf(time); //this value can be inserted into database
-        System.out.println("Timestamp to be inserted: " +appointStartTs);
-        
-        return appointStartTs;
+        Timestamp appointTime = Timestamp.valueOf(time);
+        return appointTime;
     }
+    
+    //convert utc times from the database to the system's timezone to be displayed
+    public static String ConvertToLocal(LocalDateTime time){
+        ZoneId zoneId = ZoneId.of("UTC");
+        ZonedDateTime zdt = time.atZone(zoneId);
+        ZonedDateTime lzt = zdt.withZoneSameInstant(ZoneId.systemDefault());
+        String appointTime = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy").format(lzt);
+        return appointTime;
+    }
+
 }

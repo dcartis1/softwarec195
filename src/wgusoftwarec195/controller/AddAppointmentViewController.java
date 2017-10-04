@@ -12,11 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -121,8 +124,7 @@ public class AddAppointmentViewController {
     private Appointment appointment;
     private Customer customer;
     private Schedule schedule;
-    private SpinnerValueFactory<Integer> startValueFactory;
-    private SpinnerValueFactory<Integer> endValueFactory;
+
     
     private final ObservableList<City> cityData = FXCollections.observableArrayList();
     
@@ -153,45 +155,47 @@ public class AddAppointmentViewController {
             //begin sql transaction
             conn.setAutoCommit(false);
 
-            LocalDate ad = appointDateField.getValue();
-            LocalTime st = LocalTime.parse(startTimeField.getText());
-            LocalTime et = LocalTime.parse(endTimeField.getText());
+            //formats user input from date, starttime, endtime fields and converts
+            //into localdatetime objects to be inserted into database.
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String startTime = (appointDateField.getValue()+ " "+ startTimeField.getText());
+            String endTime = (appointDateField.getValue() + " " + endTimeField.getText());
+            LocalDateTime appointStart = LocalDateTime.parse(startTime, dtf);
+            LocalDateTime appointEnd = LocalDateTime.parse(endTime, dtf);
             
-            LocalDateTime appointStart = LocalDateTime.of(ad, st);
-            LocalDateTime appointEnd = LocalDateTime.of(ad, et);
-            
-            //correctly formatted timestamp to be inserted into createdate column
-            java.util.Date dt = new java.util.Date();
-            java.text.SimpleDateFormat sdf = 
-            new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String currentTime = sdf.format(dt);
-               
-            
+            //gets current timestamp to convert from localtime to utc for the
+            //creadedate table in database
+            Date now = new Date();
+            LocalDateTime ldt = LocalDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+
             if (newAppoint == true){
-                //insert new record into address table first to retrieve address id for appointment table
+                int custId = appointment.getCustomerInAppointmentData().get(0).getCustomerId();
+                //insert new record into appointment table
                 sql = "INSERT INTO appointment (customerId, title, description, location, contact, url, start, end, createDate, createdBy, lastUpdateBy) VALUES "
-                        + "('" + appointment.getCustomerInAppointmentData().get(0).getCustomerId() +"', '"+ appointTitleField.getText()+"', '"+ appointDescriptionArea.getText() +"',"
+                        + "('" + custId +"', '"+ appointTitleField.getText()+"', '"+ appointDescriptionArea.getText() +"',"
                         + "'"+ appointLocationField.getText() +"', '"+ appointContactField.getText() +"', '"+ appointUrlField.getText() +"'"
                         + ",'"+ TimeConverter.ConvertToUtc(appointStart) +"', '"+ TimeConverter.ConvertToUtc(appointEnd) +"',"
-                        + " '"+ currentTime+"', '" + userName +"', '" + userName +"')";
-                //returns the auto_incremented addressId
+                        + " '"+ TimeConverter.ConvertToUtc(ldt)+"', '" + userName +"', '" + userName +"')";
+                //returns the auto_incremented appointmentId
                 ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 //executeUpdate method does not return resultset but instead returns affected rows as an int.
                 ps.executeUpdate();
                 rs = ps.getGeneratedKeys();
+                
                  if(rs.next()){
-                    
-                     
                     int newAppointmentId = rs.getInt(1);
-                    appointment = new Appointment();
+                    appointment.setCustomerId(custId);
                     appointment.setAppointmentId(newAppointmentId);
                     appointment.setTitle(appointTitleField.getText());
                     appointment.setDescription(appointDescriptionArea.getText());
                     appointment.setLocation(appointLocationField.getText());
                     appointment.setContact(appointContactField.getText());
                     appointment.setUrl(appointUrlField.getText());
-                    appointment.setStart(startTimeField.getText());
-                    appointment.setEnd(endTimeField.getText());
+                    
+                    String localStartTime = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy").format(appointStart);
+                    String localEndTime = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy").format(appointEnd);
+                    appointment.setStart(localStartTime);
+                    appointment.setEnd(localEndTime);
                     
                     schedule.addAppointment(appointment);
                     System.out.println("appointment added!");
@@ -199,49 +203,36 @@ public class AddAppointmentViewController {
                     conn.commit();
                  }
             }
-            /*
             else{
-                
-                //update existing appointment record
-                sql = "UPDATE appointment SET customerName='"+ custNameField.getText() +"', active="+ custActive +","
-                        + " lastUpdateBy='"+ userName +"' WHERE customerId='"+ customer.getCustomerId() +"'";
-
+                //insert new record into appointment table
+                sql = "UPDATE appointment SET customerId='"+ appointment.getCustomerInAppointmentData().get(0).getCustomerId()+ "',"
+                        + " title='"+appointTitleField.getText() +"', description='"+appointDescriptionArea.getText() +"',"
+                        + " location='"+appointLocationField.getText() +"', contact='"+ appointContactField.getText()+"',"
+                        + " url='"+ appointUrlField.getText() +"', start='"+ TimeConverter.ConvertToUtc(appointStart) +"',"
+                        + " end='"+ TimeConverter.ConvertToUtc(appointEnd) +"', lastUpdateBy='" + userName +"'"
+                        + " WHERE appointmentId='"+appointment.getAppointmendId()+"'";
+                //returns the auto_incremented appointmentId
                 ps = conn.prepareStatement(sql);
-                
-                /* 
-                    executeUpdate method does not return resultset but instead 
-                    returns affected rows as an int. no errors have occured and 
-                    if any rows affected then commit sql transaction, update model
-                    and close the add customer window
-                
+                //executeUpdate method does not return resultset but instead returns affected rows as an int.
                 int rows = ps.executeUpdate();
                 if(rows > 0){
+                    appointment.setCustomerId(appointment.getCustomerInAppointmentData().get(0).getCustomerId());
+                    appointment.setTitle(appointTitleField.getText());
+                    appointment.setDescription(appointDescriptionArea.getText());
+                    appointment.setLocation(appointLocationField.getText());
+                    appointment.setContact(appointContactField.getText());
+                    appointment.setUrl(appointUrlField.getText());                        
+                    String localStartTime = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy").format(appointStart);
+                    String localEndTime = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy").format(appointEnd);
+                    appointment.setStart(localStartTime);
+                    appointment.setEnd(localEndTime);
 
-                    sql = "UPDATE address SET address='"+ custAddressOneField.getText()+"', address2='"+ custAddressTwoField.getText() +"', cityId='"+ selectedCity +"',"
-                            + " postalCode='"+ custPostalCodeField.getText()+"', phone='"+ custPhoneField.getText() +"', lastUpdateBy='"+ userName +"'"
-                            + " WHERE address.addressId='"+ customer.getAddressId()+"'";
-
-                    ps = conn.prepareStatement(sql);
-                    rows = ps.executeUpdate();
-
-                    if(rows > 0){
-                        customer.setCustomerName(custNameField.getText());
-                        customer.setActive(custActive);
-                        customer.setPhone(custPhoneField.getText());
-                        customer.setAddressOne(custAddressOneField.getText());
-                        customer.setAddressTwo(custAddressTwoField.getText());
-                        customer.setCityId(selectedCity);
-                        customer.setPostalCode(custPostalCodeField.getText());
-
-                        schedule.updateCustomer(customer);
-
-                        System.out.println("customer edited!");
-                        dialogStage.close();
-                        //no errors occured so commit sql transaction
-                        conn.commit();
-                    }
+                    schedule.updateAppointment(appointment);
+                    System.out.println("appointment edited!");
+                    dialogStage.close();
+                    conn.commit();
                 }
-            }*/
+            }
         }
     }
     
@@ -301,10 +292,35 @@ public class AddAppointmentViewController {
     }
     
     //fills textfields with existing customer data 
-    public void setAppoint(Appointment appointment){
+    public void setAppoint(Appointment appointment) throws ClassNotFoundException, SQLException{
         this.appointment = appointment;
+        this.addAppointLabel.setText("View/Edit Appointment");
+        appointTitleField.setText(appointment.getTitle());
+        appointDescriptionArea.setText(appointment.getDescription());
+        appointLocationField.setText(appointment.getLocation());
+        appointContactField.setText(appointment.getContact());
+        appointUrlField.setText(appointment.getUrl());
         
-    //finish populating textfields with existing appointment data
+        DateTimeFormatter dtf0 = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy");
+        DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+        String startString = appointment.getStart();
+        String endString = appointment.getEnd();
+        
+        LocalDateTime localDateStart = LocalDateTime.parse(startString, dtf0);
+        LocalDateTime localDateEnd = LocalDateTime.parse(endString, dtf0);
+        
+        String startDay = DateTimeFormatter.ofPattern("yyyy/MM/dd").format(localDateStart);
+        String startTime = DateTimeFormatter.ofPattern("hh:mm").format(localDateStart);
+        String endTime = DateTimeFormatter.ofPattern("hh:mm").format(localDateEnd);
+        
+        LocalDate ld = LocalDate.parse(startDay, dtf1);
+        
+        appointDateField.setValue(ld);
+        startTimeField.setText(startTime);
+        endTimeField.setText(endTime);
+        
+        addedCustTable.setItems(appointment.getCustomerInAppointmentData());      
     }
     
     public void setMainApp(MainApp mainApp, int userId, String userName, Schedule schedule, Appointment appointment) {
@@ -314,7 +330,7 @@ public class AddAppointmentViewController {
         this.schedule = schedule;
         this.appointment = appointment;
         
-        custTable.setItems(schedule.getCustomerData());
+        custTable.setItems(schedule.getCustomerData());   
     }
     
     //validates user input of start and end appointment time textfields.

@@ -32,21 +32,6 @@ public class Schedule {
         return appointmentData;
     }
     
-    /*
-    public ObservableList<Appointment> getAppointmentByMonth(int Month){
-        for(Appointment a: appointmentData){
-            if(a.getStart(). == selectedId){
-            productData.set(i, product);
-            }
-            i++;
-
-        }
-    
-    }
-        
-        return appointmentData;
-    }*/
-    
     public ObservableList<Customer> getCustomerData() {
         return customerData;
     }
@@ -59,10 +44,18 @@ public class Schedule {
         customerData.add(customer);
     }
     
+    //lambda expression for updating an appointment
+    public void updateAppointment(Appointment appointment){
+        int i = appointment.getAppointmendId();
+        appointmentData.stream().filter((a) -> (a.getAppointmendId() == i)).forEachOrdered((Appointment a) -> {
+            appointmentData.set(appointmentData.indexOf(a), appointment);
+        });
+    }
+    
     //lambda expression for updating a customer
     public void updateCustomer(Customer customer){
         int i = customer.getCustomerId();
-        customerData.stream().filter((c) -> (c.getCustomerId() == i)).forEachOrdered((c) -> {
+        customerData.stream().filter((c) -> (c.getCustomerId() == i)).forEachOrdered((Customer c) -> {
             customerData.set(customerData.indexOf(c), customer);
         });
     }
