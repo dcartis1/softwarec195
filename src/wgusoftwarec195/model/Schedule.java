@@ -44,7 +44,7 @@ public class Schedule {
         customerData.add(customer);
     }
     
-    //lambda expression for updating an appointment
+    //lambda expression using streams and filters to efficiently update appointments
     public void updateAppointment(Appointment appointment){
         int i = appointment.getAppointmendId();
         appointmentData.stream().filter((a) -> (a.getAppointmendId() == i)).forEachOrdered((Appointment a) -> {
@@ -52,12 +52,16 @@ public class Schedule {
         });
     }
     
-    //lambda expression for updating a customer
+    //lambda expression using streams and filters to efficiently update customers
     public void updateCustomer(Customer customer){
         int i = customer.getCustomerId();
         customerData.stream().filter((c) -> (c.getCustomerId() == i)).forEachOrdered((Customer c) -> {
             customerData.set(customerData.indexOf(c), customer);
         });
+    }
+    
+    public void deleteAppointment(Appointment appointment){
+        getAppointmentData().remove(appointment);
     }
     
     public void deleteCustomer(Customer customer) {

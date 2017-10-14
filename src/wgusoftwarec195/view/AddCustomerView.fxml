@@ -15,13 +15,13 @@
       <TextField fx:id="custPhoneField" layoutX="119.0" layoutY="124.0" prefHeight="42.0" prefWidth="200.0" />
       <TextField fx:id="custAddressOneField" layoutX="119.0" layoutY="181.0" prefHeight="42.0" prefWidth="200.0" />
       <Label fx:id="addCustLabel" layoutX="14.0" layoutY="14.0" text="Add New Customer" />
-      <Label layoutX="17.0" layoutY="75.0" text="Name" />
-      <Label layoutX="17.0" layoutY="188.0" text="Address 1" />
-      <Label layoutX="16.0" layoutY="131.0" text="Phone" />
-      <Label layoutX="27.0" layoutY="354.0" text="City" />
-      <Label layoutX="17.0" layoutY="245.0" text="Address 2" />
+      <Label fx:id="custNameLabel" layoutX="17.0" layoutY="75.0" text="Name" />
+      <Label fx:id="custAddress1Label" layoutX="17.0" layoutY="188.0" text="Address 1" />
+      <Label fx:id="custPhoneLabel" layoutX="16.0" layoutY="131.0" text="Phone" />
+      <Label fx:id="custCityLabel" layoutX="27.0" layoutY="354.0" text="City" />
+      <Label fx:id="custAddress2Label" layoutX="17.0" layoutY="245.0" text="Address 2" />
       <TextField fx:id="custAddressTwoField" layoutX="119.0" layoutY="238.0" prefHeight="42.0" prefWidth="200.0" />
-      <Label layoutX="18.0" layoutY="302.0" text="Postal Code" />
+      <Label fx:id="custPostalCodeLabel" layoutX="18.0" layoutY="302.0" text="Postal Code" />
       <TextField fx:id="custPostalCodeField" layoutX="119.0" layoutY="295.0" prefHeight="42.0" prefWidth="200.0" />
       <ComboBox fx:id="custCityComboBox" layoutX="78.0" layoutY="347.0" prefHeight="42.0" prefWidth="164.0" promptText="Select City" />
       <CheckBox fx:id="custActiveCheckBox" layoutX="261.0" layoutY="354.0" mnemonicParsing="false" text="Active" />

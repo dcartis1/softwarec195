@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
  */
 public final class TimeConverter {
     
-    //Convert the system's time to utc time to be stored in database
+    //Convert to utc time to be stored in database
     public static Timestamp ConvertToUtc(LocalDateTime time){   
         ZoneId zoneId = ZoneId.systemDefault();
         ZonedDateTime zdt = time.atZone(zoneId);
@@ -33,7 +33,7 @@ public final class TimeConverter {
         ZoneId zoneId = ZoneId.of("UTC");
         ZonedDateTime zdt = time.atZone(zoneId);
         ZonedDateTime lzt = zdt.withZoneSameInstant(ZoneId.systemDefault());
-        String appointTime = DateTimeFormatter.ofPattern("hh:mm a MM-dd-yyyy").format(lzt);
+        String appointTime = DateTimeFormatter.ofPattern("h:mm a MM-dd-yyyy").format(lzt);
         return appointTime;
     }
 

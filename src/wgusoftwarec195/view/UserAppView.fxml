@@ -7,45 +7,47 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" prefHeight="700.0" prefWidth="1050.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wgusoftwarec195.controller.UserAppViewController">
+<AnchorPane id="AnchorPane" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="wgusoftwarec195.controller.UserAppViewController">
    <children>
-      <Button fx:id="exitBtn" layoutX="980.0" layoutY="644.0" mnemonicParsing="false" onAction="#exitApplication" text="Exit" />
-      <TableView fx:id="custTable" layoutX="14.0" layoutY="363.0" prefHeight="225.0" prefWidth="972.0">
+      <Button fx:id="exitBtn" layoutX="1130.0" layoutY="644.0" mnemonicParsing="false" onAction="#exitApplication" text="Exit" />
+      <TableView fx:id="custTable" layoutX="14.0" layoutY="363.0" prefHeight="225.0" prefWidth="1175.0">
         <columns>
-          <TableColumn fx:id="custIdColumn" prefWidth="88.0" text="Id" />
-          <TableColumn fx:id="custNameColumn" prefWidth="207.0" text="Name" />
-            <TableColumn fx:id="custAddressOneColumn" prefWidth="244.0" text="Address" />
-            <TableColumn fx:id="custAddressTwoColumn" prefWidth="226.0" text="Address 2" />
-            <TableColumn fx:id="custPhoneColumn" prefWidth="205.0" text="Phone" />
+          <TableColumn fx:id="custIdColumn" prefWidth="70.0" text="Id" />
+          <TableColumn fx:id="custNameColumn" prefWidth="288.0" text="Name" />
+            <TableColumn fx:id="custAddressOneColumn" prefWidth="280.0" text="Address" />
+            <TableColumn fx:id="custAddressTwoColumn" prefWidth="280.0" text="Address 2" />
+            <TableColumn fx:id="custPhoneColumn" prefWidth="254.0" text="Phone" />
         </columns>
       </TableView>
-      <TableView fx:id="appointTable" layoutX="13.0" layoutY="58.0" prefHeight="250.0" prefWidth="1024.0">
+      <TableView fx:id="appointTable" layoutX="13.0" layoutY="58.0" prefHeight="250.0" prefWidth="1175.0">
         <columns>
-          <TableColumn fx:id="appointTitleColumn" prefWidth="176.0" text="Title" />
-            <TableColumn fx:id="appointDescriptionColumn" prefWidth="241.0" text="Description" />
-            <TableColumn fx:id="appointLocationColumn" prefWidth="165.0" text="Location" />
-            <TableColumn fx:id="appointStartColumn" prefWidth="220.0" text="Start" />
-            <TableColumn fx:id="appointEndColumn" prefWidth="220.0" text="End" />
+          <TableColumn fx:id="appointTitleColumn" prefWidth="149.0" text="Title" />
+            <TableColumn fx:id="appointDescriptionColumn" prefWidth="224.0" text="Description" />
+            <TableColumn fx:id="appointCustomerColumn" prefWidth="169.0" text="Customer" />
+            <TableColumn fx:id="appointLocationColumn" prefWidth="167.0" text="Location" />
+            <TableColumn fx:id="appointStartColumn" prefWidth="239.0" text="Start" />
+            <TableColumn fx:id="appointEndColumn" prefWidth="225.0" text="End" />
         </columns>
       </TableView>
-      <ButtonBar layoutX="627.0" layoutY="588.0" prefHeight="42.0" prefWidth="358.0">
+      <ButtonBar layoutX="829.0" layoutY="588.0" prefHeight="42.0" prefWidth="358.0">
          <buttons>
-            <Button fx:id="custAddBtn" mnemonicParsing="false" onAction="#handleNewCust" prefHeight="42.0" prefWidth="94.0" text="Add" />
+            <Button fx:id="custAddBtn" mnemonicParsing="false" onAction="#handleNewCust" prefHeight="42.0" prefWidth="94.0" text="Add New" />
             <Button fx:id="custEditBtn" mnemonicParsing="false" onAction="#handleEditCust" prefHeight="42.0" prefWidth="113.0" text="View/Edit" />
             <Button fx:id="custDeleteBtn" mnemonicParsing="false" onAction="#deleteCustBtn" text="Delete" />
          </buttons>
       </ButtonBar>
       <Label layoutX="14.0" layoutY="321.0" text="Customers" />
       <Label layoutX="14.0" layoutY="14.0" text="Appointments" />
-      <ButtonBar layoutX="627.0" layoutY="308.0" prefHeight="42.0" prefWidth="358.0">
+      <ButtonBar layoutX="829.0" layoutY="308.0" prefHeight="42.0" prefWidth="358.0">
          <buttons>
-            <Button fx:id="appointmentAddBtn" mnemonicParsing="false" onAction="#handleNewAppointment" prefHeight="42.0" prefWidth="94.0" text="Add" />
+            <Button fx:id="appointmentAddBtn" mnemonicParsing="false" onAction="#handleNewAppointment" prefHeight="42.0" prefWidth="94.0" text="Add New" />
             <Button fx:id="appointmentEditBtn" mnemonicParsing="false" onAction="#handleEditAppointment" text="View/Edit" />
-            <Button fx:id="custDeleteBtn1" mnemonicParsing="false" onAction="#deleteCustBtn" text="Delete" />
+            <Button fx:id="appointDeleteBtn" mnemonicParsing="false" onAction="#deleteAppointBtn" text="Delete" />
          </buttons>
       </ButtonBar>
       <Button layoutX="290.0" layoutY="7.0" mnemonicParsing="false" onAction="#setCalendarWeekly" text="This Week" />
       <Button layoutX="154.0" layoutY="7.0" mnemonicParsing="false" onAction="#setCalendarMonthly" prefHeight="42.0" prefWidth="127.0" text="This Month" />
       <Button layoutX="417.0" layoutY="7.0" mnemonicParsing="false" onAction="#setCalendarAll" prefHeight="42.0" prefWidth="112.0" text="All" />
+      <Button layoutX="547.0" layoutY="615.0" mnemonicParsing="false" onAction="#reportBtn" prefHeight="58.0" prefWidth="106.0" text="Reports" />
    </children>
 </AnchorPane>

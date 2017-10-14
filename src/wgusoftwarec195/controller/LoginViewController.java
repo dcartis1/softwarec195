@@ -5,11 +5,16 @@
  */
 package wgusoftwarec195.controller;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -35,37 +40,63 @@ public class LoginViewController {
     @FXML Label userNameLabel;
     @FXML Label passwordLabel;
     @FXML Button loginBtn;
-    @FXML Button spanishBtn;
-    @FXML Button frenchBtn;
-    @FXML Button englishBtn;
     
-    private MainApp mainApp;
-    
-    private String userName;
-    private String userPass;
+    private MainApp mainApp;  
     private String sql;
     private PreparedStatement ps = null;
     private ResultSet rs = null;
     private int userId;
-    
+    private String userName;
     private Locale locale;
-    private ResourceBundle bundle = ResourceBundle.getBundle("wgusoftwarec195/bundles/messages", Locale.getDefault());
+    private final ResourceBundle bundle = ResourceBundle.getBundle("wgusoftwarec195/bundle/messages", Locale.getDefault());
 
-    private final Locale l1 = new Locale.Builder()
-        .setLanguage("en")
-        .setRegion("US")
-        .build();
+    @FXML
+    public void LoginBtnClick(ActionEvent event) throws SQLException, IOException, ClassNotFoundException {
+        //gets systems locale so that certain text and alerts can be translated
+        locale = Locale.getDefault();
+
+        try (Connection conn = DbConnection.createConnection()){
+            //tries to match user input with a user in the db. displays
+            //alert if no match is found
+            sql = "SELECT user.userId, user.userName, user.password from user WHERE userName = ? AND password = ?";
+
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, userNameField.getText());
+            ps.setString(2, userPassField.getText());
+            rs = ps.executeQuery();
+            //if match is found, open userappview and pass on user details to mainapp
+            //so they can then be passed to other controllers accordingly
+            if (rs.next()) {
+                userId = rs.getInt(1);
+                userName = rs.getString(2);
+                mainApp.setUserDetails(userId, userName);
+
+                //writes user details and timestamp to txt file on login. if file
+                //exists, append new record
+                try (BufferedWriter out = new BufferedWriter(new FileWriter("logins.txt", true))) {
+                    out.write("UserId:"+ userId + " UserName:" +userName+ " Time:" +Instant.now().toString()+ "\n");
+                }
+
+                boolean okClicked = mainApp.showUserAppView();
+
+            }
+            //no match was found, display alert in correct language
+            else{
+                wrongInputFXML();
+            }
+        }
+    }
     
-    private final Locale l2 = new Locale.Builder()
-        .setLanguage("es")
-        .setRegion("MX")
-        .build();
-    
-    private final Locale l3 = new Locale.Builder()
-        .setLanguage("fr")
-        .setRegion("CA")
-        .build();
-   
+    //invalid user login information alert. translated between english, spanish, french
+    //depending on the systems locale
+    public void wrongInputFXML() throws IOException {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(bundle.getString("loginAlertTitle"));
+        alert.setHeaderText(bundle.getString("loginAlertHeader"));
+        alert.setContentText(bundle.getString("loginAlertContent"));
+
+        alert.showAndWait();  
+    }
     
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
@@ -74,89 +105,6 @@ public class LoginViewController {
         loginLabel.setText(bundle.getString("loginLabel"));
         userNameLabel.setText(bundle.getString("userNameLabel"));
         passwordLabel.setText(bundle.getString("passwordLabel"));
-        spanishBtn.setText(bundle.getString("spanishBtn"));
-        frenchBtn.setText(bundle.getString("frenchBtn"));
-        englishBtn.setText(bundle.getString("englishBtn"));
         loginBtn.setText(bundle.getString("loginBtn"));
-    }
-    
-    public LoginViewController() {
-    }
-    
-    
-    @FXML
-    void EnglishBtnClick(ActionEvent event){
-        Locale.setDefault(l1);
-        loadLanguage("en");
-    }
-    
-    @FXML
-    void SpanishBtnClick(ActionEvent event){
-        Locale.setDefault(l2);
-        loadLanguage("es");
-    }
-    
-    @FXML
-    void FrenchBtnClick(ActionEvent event){
-        Locale.setDefault(l3);
-        loadLanguage("fr");
-    }
-    
-    private void loadLanguage(String Language){
-        locale = new Locale(Language);
-        this.bundle = ResourceBundle.getBundle("wgusoftwarec195/bundles/messages", locale);
-        
-        greetingLabel.setText(bundle.getString("greetingLabel"));
-        loginLabel.setText(bundle.getString("loginLabel"));
-        userNameLabel.setText(bundle.getString("userNameLabel"));
-        passwordLabel.setText(bundle.getString("passwordLabel"));
-        spanishBtn.setText(bundle.getString("spanishBtn"));
-        frenchBtn.setText(bundle.getString("frenchBtn"));
-        englishBtn.setText(bundle.getString("englishBtn"));
-        loginBtn.setText(bundle.getString("loginBtn"));
-        
-        System.out.println("Locale set to " + Locale.getDefault());
-    }
-   
-    @FXML
-    public void LoginBtnClick(ActionEvent event) throws SQLException, IOException, ClassNotFoundException {
-        locale = Locale.getDefault();
-        
-        userName = userNameField.getText().trim();
-        userPass = userPassField.getText().trim();
-
-        try (Connection conn = DbConnection.createConnection()){
-            sql = "SELECT user.userId, user.userName, user.password from user WHERE userName = ? AND password = ?";
-            
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, userName);
-            ps.setString(2, userPass);
-            rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                
-                userId = rs.getInt(1);
-                System.out.println("Login Successful!");
-                System.out.println("Your location is " +locale);
-                
-                System.out.println("User has an id of " +userId);
-                
-            mainApp.setUserDetails(userId, userName);
-            
-            boolean okClicked = mainApp.showUserAppView();
-
-            } else {
-                wrongInputFXML();
-            }
-        }
-    }
-    public void wrongInputFXML() throws IOException {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(bundle.getString("loginAlertTitle"));
-        alert.setHeaderText(bundle.getString("loginAlertHeader"));
-        alert.setContentText(bundle.getString("loginAlertContent"));
-
-        alert.showAndWait();
-        
     }
 }

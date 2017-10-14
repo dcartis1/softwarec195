@@ -24,9 +24,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import wgusoftwarec195.DbConnection;
 import wgusoftwarec195.MainApp;
+import wgusoftwarec195.exception.CustomerInfoError;
 import wgusoftwarec195.model.Customer;
 import wgusoftwarec195.model.City;
 import wgusoftwarec195.model.Schedule;
@@ -38,6 +40,18 @@ public class AddCustomerViewController {
     
     @FXML
     private Label addCustLabel;
+    @FXML
+    private Label custNameLabel;
+    @FXML
+    private Label custPhoneLabel;
+    @FXML
+    private Label custAddress1Label;
+    @FXML
+    private Label custAddress2Label;
+    @FXML
+    private Label custPostalCodeLabel;
+    @FXML
+    private Label custCityLabel;
     @FXML
     private TextField custNameField;
     @FXML
@@ -71,14 +85,15 @@ public class AddCustomerViewController {
     private int custActive;
     private Customer customer;
     private Schedule schedule;
-    
     private final ObservableList<City> cityData = FXCollections.observableArrayList();
     
     @FXML
     private void initialize() throws SQLException, ClassNotFoundException{
 
-        //gets all cities from city table and populates combobox with them
-        //so the user can choose a customer's city when adding or editing customers
+        //gets all cities from city table in db and populates combobox with them
+        //so the user can choose a city when adding or editing customers.
+        //the cities available for choosing are cities where we have offices.
+        //"New York, London, and Phoenix"
         sql = "SELECT city.cityId, city.city, city.countryId from city";
         try(Connection conn = DbConnection.createConnection()){
             ps = conn.prepareStatement(sql);
@@ -88,7 +103,7 @@ public class AddCustomerViewController {
             }
         }
         custCityComboBox.setItems(cityData);
-        
+
         //custom cellfactory for combobox will display city name for each city in citydata observablelist
         custCityComboBox.setCellFactory((ListView<City> p) -> new ListCell<City>() { 
             @Override
@@ -101,7 +116,7 @@ public class AddCustomerViewController {
                 }
             }
         });
-        //displays city name when a city is selected in combobox.
+        //displays the selected city name in the combobox.
         custCityComboBox.setButtonCell(new ListCell<City>() {
             @Override
             protected void updateItem(City t, boolean bln) {
@@ -117,18 +132,19 @@ public class AddCustomerViewController {
     
     //save button inside add new customer window
     @FXML
-    public void handleAddCustBtn(ActionEvent event) throws SQLException, IOException, ClassNotFoundException{  
-
+    public void handleAddCustBtn(ActionEvent event) throws SQLException, IOException, ClassNotFoundException, CustomerInfoError{
+        //validates user input. throws CustomerInfoError
+        checkCustomer();
         //everything related to adding or updating customer is performed in this try-with-resources block
         //so that if any errors occur, the sql transaction will not commit and roll back any database changes.
         try (Connection conn = DbConnection.createConnection()){
-            
+
             //begin sql transaction
             conn.setAutoCommit(false);
-            
+
             //gets selected city id from combobox
             int selectedCity = custCityComboBox.getSelectionModel().getSelectedItem().getCityId();
-  
+
             //correctly formatted datetime to be inserted into createdate and lastupdateby columns
             java.util.Date dt = new java.util.Date();
             java.text.SimpleDateFormat sdf = 
@@ -142,20 +158,21 @@ public class AddCustomerViewController {
             else{
                 this.custActive = 0;
             }
-            
+
+            //mainapp tells us if user is adding or editing a customer
             if (newCust == true){
                 //insert new record into address table first to retrieve address id for customer table
                 sql = "INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdateBy) VALUES "
                         + "('"+ custAddressOneField.getText() +"', '"+ custAddressTwoField.getText()+"', '"+ selectedCity +"',"
                         + "'"+ custPostalCodeField.getText() +"', '"+ custPhoneField.getText() +"', '"+ currentTime +"'"
                         + ", '" + userName +"', '" + userName +"')";
-                //returns the auto_incremented addressId
+                //returns the auto_incremented addressId to be put into customer table
                 ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 //executeUpdate method does not return resultset but instead returns affected rows as an int.
                 ps.executeUpdate();
                 rs = ps.getGeneratedKeys();
 
-                //insert new record into customer table in sql db
+                //if insert address success, then insert new customer into customer table
                 if (rs.next()){
                     int newAddressId = rs.getInt(1);
                     sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy) VALUES ('"+ custNameField.getText()
@@ -165,7 +182,8 @@ public class AddCustomerViewController {
                     ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                     ps.executeUpdate();
                     rs = ps.getGeneratedKeys();
-                    //add new customer to customer arraylist
+                    //if insert success then add customer object into schedule, commit
+                    //transaction and close dialog
                     if(rs.next()){
                         int newCustomerId = rs.getInt(1);
                         customer = new Customer();
@@ -180,36 +198,30 @@ public class AddCustomerViewController {
                         customer.setPostalCode(custPostalCodeField.getText());
 
                         schedule.addCustomer(customer);
-                        
-                        System.out.println("customer added!");
+
                         dialogStage.close();
                         conn.commit();
                     }
                 }
             }
+            //this means user is updating an existing customer
             else{
-                //update existing customer record
                 sql = "UPDATE customer SET customerName='"+ custNameField.getText() +"', active="+ custActive +","
                         + " lastUpdateBy='"+ userName +"' WHERE customerId='"+ customer.getCustomerId() +"'";
 
                 ps = conn.prepareStatement(sql);
-                
-                /* 
-                    executeUpdate method does not return resultset but instead 
-                    returns affected rows as an int. no errors have occured and 
-                    if any rows affected then commit sql transaction, update model
-                    and close the add customer window
-                */
+                //executeUpdate method does not return resultset but instead returns affected rows as an int.
                 int rows = ps.executeUpdate();
+                //if update success then update the related address record
                 if(rows > 0){
-
                     sql = "UPDATE address SET address='"+ custAddressOneField.getText()+"', address2='"+ custAddressTwoField.getText() +"', cityId='"+ selectedCity +"',"
                             + " postalCode='"+ custPostalCodeField.getText()+"', phone='"+ custPhoneField.getText() +"', lastUpdateBy='"+ userName +"'"
                             + " WHERE address.addressId='"+ customer.getAddressId()+"'";
 
                     ps = conn.prepareStatement(sql);
                     rows = ps.executeUpdate();
-
+                    //if update success then update existing customer object, commit
+                    //sql transaction and close dialog
                     if(rows > 0){
                         customer.setCustomerName(custNameField.getText());
                         customer.setActive(custActive);
@@ -221,9 +233,7 @@ public class AddCustomerViewController {
 
                         schedule.updateCustomer(customer);
 
-                        System.out.println("customer edited!");
                         dialogStage.close();
-                        //no errors occured so commit sql transaction
                         conn.commit();
                     }
                 }
@@ -231,6 +241,7 @@ public class AddCustomerViewController {
         }
     }
     
+    //cancel button in add customer window
     @FXML
     public void addCustCancelBtn(ActionEvent event){
         if(newCust == true){
@@ -256,20 +267,13 @@ public class AddCustomerViewController {
         }
     }
     
-    public void setDialogStage(Stage dialogStage) {
-        this.dialogStage = dialogStage;
-    }
-    
     //main app tells us if user is adding new or editing existing customer
     public void setNewCust(boolean newCust){
         this.newCust = newCust;
     }
 
-    public boolean isOkClicked() {
-        return okClicked;
-    }
-    
-    //fills textfields with existing customer data 
+    //selected customer object is passed through mainapp, from userappview, and then
+    //fills textfields and tables with existing customer data for viewing/editing
     public void setCustomer(Customer customer){
         this.customer = customer;
         this.addCustLabel.setText("Edit Customer");
@@ -296,4 +300,38 @@ public class AddCustomerViewController {
         this.schedule = schedule;
     }
     
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
+    }
+    
+    public boolean isOkClicked() {
+        return okClicked;
+    }
+    
+    
+    //checks if customer input is valid
+    public void checkCustomer() throws CustomerInfoError{
+        if(custNameField.getText().isEmpty() || custNameField.getText() == null || !custNameField.getText().matches("^[\\p{L} .'-]+$")){
+            custNameLabel.setTextFill(Color.web("red"));
+            throw new CustomerInfoError("Customer Name must not be empty and contain only letters.");
+        }
+        if(custPhoneField.getText().isEmpty() || custPhoneField.getText() == null || !custPhoneField.getText().matches("\\d+")){
+            custPhoneLabel.setTextFill(Color.web("red"));
+            throw new CustomerInfoError("Customer Phone must not be empty and contain only digits.");
+        }
+        //address 1 and 2 cannot be null in database but I insert an empty string for address 2 incase customer has only 1 address
+        if(custAddressOneField.getText().isEmpty() || custAddressOneField.getText() == null){
+            custAddress1Label.setTextFill(Color.web("red"));
+            throw new CustomerInfoError("Address 1 must not be empty.");
+        }
+        
+        if(custPostalCodeField.getText().isEmpty() || custPostalCodeField.getText() == null || !custPostalCodeField.getText().matches("\\d+")){
+            custPostalCodeLabel.setTextFill(Color.web("red"));
+            throw new CustomerInfoError("Postal Code must not be empty and contain only digits.");
+        }
+        if(custCityComboBox.getSelectionModel().isEmpty() || custCityComboBox.getSelectionModel() == null){
+            custCityLabel.setTextFill(Color.web("red"));
+            throw new CustomerInfoError("Please select a City in the dropdown box.");
+        }    
+    }
 }
